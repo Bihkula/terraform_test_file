@@ -1,5 +1,0 @@
-skip-check:
-  - CKV_AWS_260   # HTTP port 80 open - required for web server
-  - CKV2_AWS_62   # S3 event notifications - not required
-  - CKV2_AWS_61   # S3 lifecycle - not required
-  - CKV_AWS_144   # S3 cross-region replication - not required
