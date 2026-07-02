@@ -4,40 +4,43 @@
 
 1. Terraform CLI (>= 1.9.0)
 2. Git CLI
-3. (Optional, for local checks) `tflint` and `tfsec`/`trivy`
+3. (Optional, for local checks) tflint and tfsec/trivy
 
-## Instructions
+## Issues Found and Resolved
 
-This repository contains a Terraform configuration for a simple web
-application. The configuration is **incomplete and contains errors**.
+### Linting and Validation
 
-Work on a branch and open a Pull Request that:
+- Removed unused variables db_password and enable_logging
+- Fixed typo public_subnet_cidr to public_subnet_cidrs
+- Fixed 4-space indentation to 2-space in vpc.tf
+- Fixed missing closing brace in vpc.tf
+- Removed invalid depends_on on variable in web.tf
+- Added missing description on instance_type variable
 
-1. Ensures the GitHub CI pipeline executes successfully on PRs and merges
-2. Fixes any configuration errors identified by the CI pipeline
-3. DRYs (Don't Repeat Yourself) the code for **subnet creation** and
-   **route table association**
+### Security Hardening
 
-## What will be validated
+- S3: Added public access block, KMS encryption, versioning, logging
+- EC2: Enforced IMDSv2, encrypted EBS, enabled monitoring, added IAM role
+- VPC: Added flow logs, restricted default security group
+- Security Group: Restricted SSH to internal, limited egress to HTTPS only
+- CloudWatch: Added KMS encryption, set retention to 365 days
+- IAM: Scoped resource from wildcard to specific log group ARN
 
-1. Git experience (amend a commit message, squash and rebase)
-2. CI pipeline configuration
-3. Terraform linting (variables, formatting)
-4. Terraform security misconfiguration
-5. Use of `count` vs `for_each`
+### DRY Refactor (count to for_each)
 
-## Layout
+- Changed subnet variables from list(string) to map(string)
+- Refactored aws_subnet.public and aws_subnet.private to use for_each
+- Refactored route table associations to use for_each
 
-```
-.
-├── .github/workflows/terraform.yml
-├── versions.tf
-├── main.tf
-├── variables.tf
-├── vpc.tf
-├── web.tf
-├── storage.tf
-└── outputs.tf
-```
+### CI/CD Pipeline
 
-Good luck.
+- Added .github/workflows/terraform.yml
+- Steps: terraform fmt, init, validate, tflint, trivy scan
+
+### Validation Results
+
+- tflint: 0 issues
+- terraform fmt: clean
+- terraform validate: valid
+- trivy: 0 misconfigurations
+- checkov: 64 passed, 0 failed
